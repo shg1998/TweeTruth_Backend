@@ -1,4 +1,6 @@
 using Data;
+using Data.Contracts;
+using Data.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +27,8 @@ namespace MyBackendApis
             {
                 options.UseSqlServer(Configuration.GetConnectionString("SqlServer"));
             });
+            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            services.AddScoped<IUserRepository, UserRepository>();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
