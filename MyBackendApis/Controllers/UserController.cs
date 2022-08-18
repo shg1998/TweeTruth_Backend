@@ -5,10 +5,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MyBackendApis.Models;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using Common.Exceptions;
-using Services.Services;
+using Common.Utilities;
+using Microsoft.AspNetCore.Authorization;
+using Service.Services;
 using WebFrameworks.Api;
 using WebFrameworks.Filters;
 
@@ -31,8 +34,15 @@ namespace MyBackendApis.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<List<User>>> Get(CancellationToken cancellationToken)
         {
+            //var userName = HttpContext.User.Identity.GetUserName();
+            //userName = HttpContext.User.Identity.Name;
+            //var userId = HttpContext.User.Identity.GetUserId();
+            //var phoneNumber = HttpContext.User.Identity.FindFirstValue(ClaimTypes.MobilePhone);
+            //var role = HttpContext.User.Identity.FindFirstValue(ClaimTypes.Role);
+
             var users = await _userRepository.TableNoTracking.ToListAsync(cancellationToken);
             return Ok(users);
         }
@@ -49,6 +59,7 @@ namespace MyBackendApis.Controllers
         }
 
         [HttpGet("[action]")]
+        [AllowAnonymous]
         public async Task<string> Login(string userName, string password, CancellationToken cancellationToken)
         {
             var user = await _userRepository.GetByUserAndPass(userName, password, cancellationToken);

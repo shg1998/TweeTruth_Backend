@@ -1,17 +1,16 @@
-﻿using Common;
-using Entities;
+﻿using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Claims;
+using System.Text;
+using Common;
+using Entities.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using Entities.User;
 
-
-namespace Services.Services
+namespace Service.Services
 {
     public class JwtService:IJwtService 
     {
@@ -65,9 +64,8 @@ namespace Services.Services
                 new Claim(securityStampClaimType, user.SecurityStamp.ToString())
             };
 
-            var roles = new Role[] { new Role { Name = "Admin" } };
-            foreach (var role in roles)
-                list.Add(new Claim(ClaimTypes.Role, role.Name));
+            var roles = new Role[] { new() { Name = "Admin" } };
+            list.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role.Name)));
 
             return list;
         }
