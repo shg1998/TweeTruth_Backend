@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Services
+namespace WebFrameworks
 {
     public class Class1
     {

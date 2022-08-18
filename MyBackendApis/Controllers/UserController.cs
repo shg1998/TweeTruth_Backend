@@ -1,16 +1,16 @@
-﻿using System;
-using Data.Contracts;
+﻿using Data.Contracts;
 using Entities.User;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MyBackendApis.Models;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using ElmahCore;
-using Microsoft.Extensions.Logging;
-using WebFramework.Api;
-using WebFramework.Filters;
+using Common.Exceptions;
+using Services.Services;
+using WebFrameworks.Api;
+using WebFrameworks.Filters;
 
 namespace MyBackendApis.Controllers
 {
@@ -21,11 +21,13 @@ namespace MyBackendApis.Controllers
     {
         private readonly IUserRepository _userRepository;
         private readonly ILogger<UserController> _logger;
+        private readonly IJwtService _jwtService;
 
-        public UserController(IUserRepository userRepository,ILogger<UserController> logger)
+        public UserController(IUserRepository userRepository, ILogger<UserController> logger,IJwtService jwtService)
         {
             this._userRepository = userRepository;
             _logger = logger;
+            _jwtService = jwtService;
         }
 
         [HttpGet]
@@ -44,6 +46,15 @@ namespace MyBackendApis.Controllers
             if (user == null)
                 return NotFound();
             return user;
+        }
+
+        [HttpGet("[action]")]
+        public async Task<string> Login(string userName, string password, CancellationToken cancellationToken)
+        {
+            var user = await _userRepository.GetByUserAndPass(userName, password, cancellationToken);
+            if (user == null) throw new BadRequestException("نام کاربری یا رمز عبور اشتباه است");
+            var token = this._jwtService.Generate(user);
+            return token;
         }
 
         [HttpPost]
