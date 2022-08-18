@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using Common.Utilities;
+﻿using Common.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Linq;
+using Common;
 
 namespace WebFramework.Api
 {
@@ -25,10 +23,10 @@ namespace WebFramework.Api
         }
 
         #region Implicit Operators
-        public static implicit operator ApiResult(OkResult result) => 
+        public static implicit operator ApiResult(OkResult result) =>
             new ApiResult(true, ApiResultStatusCode.Success);
 
-        public static implicit operator ApiResult(BadRequestResult result) => 
+        public static implicit operator ApiResult(BadRequestResult result) =>
             new ApiResult(false, ApiResultStatusCode.BadRequest);
 
         public static implicit operator ApiResult(BadRequestObjectResult result)
@@ -41,10 +39,10 @@ namespace WebFramework.Api
             return new ApiResult(false, ApiResultStatusCode.BadRequest, message);
         }
 
-        public static implicit operator ApiResult(ContentResult result) => 
+        public static implicit operator ApiResult(ContentResult result) =>
             new ApiResult(true, ApiResultStatusCode.Success, result.Content);
 
-        public static implicit operator ApiResult(NotFoundResult result) => 
+        public static implicit operator ApiResult(NotFoundResult result) =>
             new ApiResult(false, ApiResultStatusCode.NotFound);
 
         #endregion
@@ -63,16 +61,16 @@ namespace WebFramework.Api
         }
 
         #region Implicit Operators
-        public static implicit operator ApiResult<TData>(TData data) => 
+        public static implicit operator ApiResult<TData>(TData data) =>
             new ApiResult<TData>(true, ApiResultStatusCode.Success, data);
 
-        public static implicit operator ApiResult<TData>(OkResult result) => 
+        public static implicit operator ApiResult<TData>(OkResult result) =>
             new ApiResult<TData>(true, ApiResultStatusCode.Success, null);
 
-        public static implicit operator ApiResult<TData>(OkObjectResult result) => 
+        public static implicit operator ApiResult<TData>(OkObjectResult result) =>
             new ApiResult<TData>(true, ApiResultStatusCode.Success, (TData)result.Value);
 
-        public static implicit operator ApiResult<TData>(BadRequestResult result) => 
+        public static implicit operator ApiResult<TData>(BadRequestResult result) =>
             new ApiResult<TData>(false, ApiResultStatusCode.BadRequest, null);
 
         public static implicit operator ApiResult<TData>(BadRequestObjectResult result)
@@ -85,26 +83,15 @@ namespace WebFramework.Api
             return new ApiResult<TData>(false, ApiResultStatusCode.BadRequest, null, message);
         }
 
-        public static implicit operator ApiResult<TData>(ContentResult result) => 
+        public static implicit operator ApiResult<TData>(ContentResult result) =>
             new ApiResult<TData>(true, ApiResultStatusCode.Success, null, result.Content);
 
-        public static implicit operator ApiResult<TData>(NotFoundResult result) => 
+        public static implicit operator ApiResult<TData>(NotFoundResult result) =>
             new ApiResult<TData>(false, ApiResultStatusCode.NotFound, null);
 
-        public static implicit operator ApiResult<TData>(NotFoundObjectResult result) => 
+        public static implicit operator ApiResult<TData>(NotFoundObjectResult result) =>
             new ApiResult<TData>(false, ApiResultStatusCode.NotFound, (TData)result.Value);
 
         #endregion
-    }
-
-    public enum ApiResultStatusCode
-    {
-        [Display(Name = "عملیات با موفقیت انجام شد")]
-        Success = 0,
-        [Display(Name = "خطایی در سرور رخ داده است")]
-        ServerError = 1,
-        BadRequest = 2,
-        NotFound = 3,
-        ListEmpty = 4
     }
 }

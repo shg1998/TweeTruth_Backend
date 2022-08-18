@@ -1,21 +1,19 @@
-﻿using Data.Repositories;
-using Entities;
+﻿using Data.Contracts;
+using Entities.User;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyBackendApis.Models;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Data.Contracts;
 using WebFramework.Api;
 using WebFramework.Filters;
-using Entities.User;
 
 namespace MyBackendApis.Controllers
 {
     [Route("api/[controller]")]
     [ApiResultFilter]
-    [ApiController]
+    [ApiController] // if its not exists, we should use [FromBody] for each inputs of actions:)
     public class UserController : ControllerBase
     {
         private readonly IUserRepository _userRepository;
