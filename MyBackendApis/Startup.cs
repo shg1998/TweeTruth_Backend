@@ -1,6 +1,8 @@
 using Data;
 using Data.Contracts;
 using Data.Repositories;
+using ElmahCore.Mvc;
+using ElmahCore.Sql;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +30,11 @@ namespace MyBackendApis
             {
                 options.UseSqlServer(Configuration.GetConnectionString("SqlServer"));
             });
+            services.AddElmah<SqlErrorLog>(options =>
+            {
+                options.Path = "/elmah";
+                options.ConnectionString = Configuration.GetConnectionString("Elmah");
+            });
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddControllers();
@@ -50,6 +57,8 @@ namespace MyBackendApis
             }
             else
                 app.UseExceptionHandler();
+
+            app.UseElmah();
 
             app.UseHttpsRedirection();
 

@@ -1,4 +1,5 @@
-﻿using Data.Contracts;
+﻿using System;
+using Data.Contracts;
 using Entities.User;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +7,8 @@ using MyBackendApis.Models;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using ElmahCore;
+using Microsoft.Extensions.Logging;
 using WebFramework.Api;
 using WebFramework.Filters;
 
@@ -17,10 +20,12 @@ namespace MyBackendApis.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserRepository _userRepository;
+        private readonly ILogger<UserController> _logger;
 
-        public UserController(IUserRepository userRepository)
+        public UserController(IUserRepository userRepository,ILogger<UserController> logger)
         {
             this._userRepository = userRepository;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -33,6 +38,8 @@ namespace MyBackendApis.Controllers
         [HttpGet("{id:int}")]
         public async Task<ApiResult<User>> Get(int id, CancellationToken cancellationToken)
         {
+            //_logger.LogError("Get User Called:)"); // inCompatible with Elmah
+            //await (HttpContext?.RiseError(new Exception("متد فراخوانی کاربران صدا زده شده است"))).ConfigureAwait(false);
             var user = await _userRepository.GetByIdAsync(cancellationToken, id);
             if (user == null)
                 return NotFound();

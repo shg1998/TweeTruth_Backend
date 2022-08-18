@@ -116,7 +116,7 @@ namespace WebFramework.Middlewares
                 context.Response.ContentType = "application/json";
                 await context.Response.WriteAsync(json);
             }
-
+            
             void SetUnAuthorizeResponse(Exception exception)
             {
                 httpStatusCode = HttpStatusCode.Unauthorized;
