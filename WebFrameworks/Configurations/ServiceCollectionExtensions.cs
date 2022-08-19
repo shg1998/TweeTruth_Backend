@@ -27,6 +27,7 @@ namespace WebFrameworks.Configurations
             }).AddJwtBearer(options =>
             {
                 var secretKey = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
+                var encryptionKey = Encoding.UTF8.GetBytes(jwtSettings.EncryptKey);
 
                 var validationParameters = new TokenValidationParameters
                 {
@@ -43,7 +44,9 @@ namespace WebFrameworks.Configurations
                     ValidAudience = jwtSettings.Audience,
 
                     ValidateIssuer = true, //default : false
-                    ValidIssuer = jwtSettings.Issuer
+                    ValidIssuer = jwtSettings.Issuer,
+
+                    TokenDecryptionKey = new SymmetricSecurityKey(encryptionKey)
                 };
 
                 options.RequireHttpsMetadata = false;
