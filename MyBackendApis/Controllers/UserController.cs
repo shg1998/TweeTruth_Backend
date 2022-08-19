@@ -1,17 +1,16 @@
-﻿using Data.Contracts;
+﻿using Common.Exceptions;
+using Data.Contracts;
 using Entities.User;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MyBackendApis.Models;
+using Service.Services;
 using System.Collections.Generic;
-using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using Common.Exceptions;
-using Common.Utilities;
-using Microsoft.AspNetCore.Authorization;
-using Service.Services;
 using WebFrameworks.Api;
 using WebFrameworks.Filters;
 
@@ -19,18 +18,25 @@ namespace MyBackendApis.Controllers
 {
     [Route("api/[controller]")]
     [ApiResultFilter]
-    [ApiController] // if its not exists, we should use [FromBody] for each inputs of actions:)
+    [ApiController]
     public class UserController : ControllerBase
     {
         private readonly IUserRepository _userRepository;
         private readonly ILogger<UserController> _logger;
         private readonly IJwtService _jwtService;
+        private readonly UserManager<User> _userManager;
+        private readonly RoleManager<Role> _roleManager;
+        private readonly SignInManager<User> _signInManager;
 
-        public UserController(IUserRepository userRepository, ILogger<UserController> logger,IJwtService jwtService)
+        public UserController(IUserRepository userRepository, ILogger<UserController> logger, IJwtService jwtService,
+            UserManager<User> userManager, RoleManager<Role> roleManager, SignInManager<User> signInManager)
         {
             this._userRepository = userRepository;
-            _logger = logger;
-            _jwtService = jwtService;
+            this._logger = logger;
+            this._jwtService = jwtService;
+            this._userManager = userManager;
+            this._roleManager = roleManager;
+            this._signInManager = signInManager;
         }
 
         [HttpGet]
@@ -40,7 +46,8 @@ namespace MyBackendApis.Controllers
             //var userName = HttpContext.User.Identity.GetUserName();
             //userName = HttpContext.User.Identity.Name;
             //var userId = HttpContext.User.Identity.GetUserId();
-            //var phoneNumber = HttpContext.User.Identity.FindFirstValue(ClaimTypes.MobilePhone);
+            //var userIdInt = HttpContext.User.Identity.GetUserId<int>();
+            //var phone = HttpContext.User.Identity.FindFirstValue(ClaimTypes.MobilePhone);
             //var role = HttpContext.User.Identity.FindFirstValue(ClaimTypes.Role);
 
             var users = await _userRepository.TableNoTracking.ToListAsync(cancellationToken);
@@ -50,30 +57,50 @@ namespace MyBackendApis.Controllers
         [HttpGet("{id:int}")]
         public async Task<ApiResult<User>> Get(int id, CancellationToken cancellationToken)
         {
-            //_logger.LogError("Get User Called:)"); // inCompatible with Elmah
-            //await (HttpContext?.RiseError(new Exception("متد فراخوانی کاربران صدا زده شده است"))).ConfigureAwait(false);
+            var user2 = await _userManager.FindByIdAsync(id.ToString());
+            var role = await _roleManager.FindByNameAsync("Admin");
+
             var user = await _userRepository.GetByIdAsync(cancellationToken, id);
             if (user == null)
                 return NotFound();
+
+            await _userManager.UpdateSecurityStampAsync(user);
+            //await userRepository.UpdateSecuirtyStampAsync(user, cancellationToken);
+
             return user;
         }
 
         [HttpGet("[action]")]
         [AllowAnonymous]
-        public async Task<string> Login(string userName, string password, CancellationToken cancellationToken)
+        public async Task<string> Token(string username, string password, CancellationToken cancellationToken)
         {
-            var user = await _userRepository.GetByUserAndPass(userName, password, cancellationToken);
-            if (user == null) throw new BadRequestException("نام کاربری یا رمز عبور اشتباه است");
-            var token = this._jwtService.Generate(user);
-            return token;
+            //var user = await userRepository.GetByUserAndPass(username, password, cancellationToken);
+            var user = await _userManager.FindByNameAsync(username);
+            if (user == null)
+                throw new BadRequestException("نام کاربری یا رمز عبور اشتباه است");
+            var isPasswordValid = await _userManager.CheckPasswordAsync(user, password);
+            if (!isPasswordValid)
+                throw new BadRequestException("نام کاربری یا رمز عبور اشتباه است");
+
+
+            //if (user == null)
+            //    throw new BadRequestException("نام کاربری یا رمز عبور اشتباه است");
+
+            var jwt = await _jwtService.GenerateAsync(user);
+            return jwt;
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<ApiResult<User>> Create(UserDto userDto, CancellationToken cancellationToken)
         {
+            //logger.LogError("متد Create فراخوانی شد");
+            //HttpContext.RiseError(new Exception("متد Create فراخوانی شد"));
+
             //var exists = await userRepository.TableNoTracking.AnyAsync(p => p.UserName == userDto.UserName);
             //if (exists)
             //    return BadRequest("نام کاربری تکراری است");
+
 
             var user = new User
             {
@@ -81,8 +108,19 @@ namespace MyBackendApis.Controllers
                 FullName = userDto.FullName,
                 Gender = userDto.Gender,
                 UserName = userDto.UserName,
+                Email = userDto.Email
             };
-            await _userRepository.AddAsync(user, userDto.Password, cancellationToken);
+            var result = await _userManager.CreateAsync(user, userDto.Password);
+
+            var result2 = await _roleManager.CreateAsync(new Role
+            {
+                Name = "Admin",
+                Description = "admin role"
+            });
+
+            var result3 = await _userManager.AddToRoleAsync(user, "Admin");
+
+            //await userRepository.AddAsync(user, userDto.Password, cancellationToken);
             return user;
         }
 

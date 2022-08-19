@@ -7,11 +7,12 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Data.Contracts;
 
 namespace Data.Repositories
 {
     public class Repository<TEntity> : IRepository<TEntity>
-        where TEntity : class, IEntity
+          where TEntity : class, IEntity
     {
         protected readonly ApplicationDbContext DbContext;
         public DbSet<TEntity> Entities { get; }

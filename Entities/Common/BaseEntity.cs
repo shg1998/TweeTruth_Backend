@@ -2,12 +2,11 @@
 {
     public interface IEntity
     {
-
     }
 
-    public abstract class BaseEntity<T>:IEntity
+    public abstract class BaseEntity<TKey> : IEntity
     {
-        public T Id { get; set; }
+        public TKey Id { get; set; }
     }
 
     public abstract class BaseEntity : BaseEntity<int>

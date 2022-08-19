@@ -38,15 +38,14 @@ namespace MyBackendApis
             {
                 options.UseSqlServer(Configuration.GetConnectionString("SqlServer"));
             });
+            services.AddCustomIdentity(_siteSetting.IdentitySettings);
+
             services.AddElmah<SqlErrorLog>(options =>
             {
                 options.Path = "/elmah";
                 options.ConnectionString = Configuration.GetConnectionString("Elmah");
             });
 
-            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-            services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IJwtService, JwtService>();
             services.AddControllers(options =>
             {
                 options.Filters.Add(new AuthorizeFilter());
@@ -56,6 +55,10 @@ namespace MyBackendApis
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "MyBackendApis", Version = "v1" });
             });
+
+            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IJwtService, JwtService>();
 
             services.AddJwtAuthentication(_siteSetting.JwtSettings);
         }

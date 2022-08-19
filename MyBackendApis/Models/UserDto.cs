@@ -12,6 +12,10 @@ namespace MyBackendApis.Models
         public string UserName { get; set; }
 
         [Required]
+        [StringLength(100)]
+        public string Email { get; set; }
+
+        [Required]
         [StringLength(500)]
         public string Password { get; set; }
 
@@ -29,8 +33,8 @@ namespace MyBackendApis.Models
                 yield return new ValidationResult("نام کاربری نمیتواند Test باشد", new[] { nameof(UserName) });
             if (Password.Equals("123456"))
                 yield return new ValidationResult("رمز عبور نمیتواند 123456 باشد", new[] { nameof(Password) });
-            if (Gender == GenderType.Male && Age > 50)
-                yield return new ValidationResult("آقایان بیشتر از 50 سال معتبر نیستند", new[] { nameof(Gender), nameof(Age) });
+            if (Gender == GenderType.Male && Age > 30)
+                yield return new ValidationResult("آقایان بیشتر از 30 سال معتبر نیستند", new[] { nameof(Gender), nameof(Age) });
         }
     }
 }

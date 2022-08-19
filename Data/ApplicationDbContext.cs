@@ -4,18 +4,33 @@ using System.Threading;
 using System.Threading.Tasks;
 using Common.Utilities;
 using Entities.Common;
+using Entities.User;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<User, Role, int>
+    //DbContext
     {
-        public ApplicationDbContext(DbContextOptions options) : base(options) { }
+        public ApplicationDbContext(DbContextOptions options)
+            : base(options)
+        {
+
+        }
+
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
+        //    optionsBuilder.UseSqlServer("Data Source=.;Initial Catalog=MyApiDb;Integrated Security=true");
+        //    base.OnConfiguring(optionsBuilder);
+        //}
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
             var entitiesAssembly = typeof(IEntity).Assembly;
+
             modelBuilder.RegisterAllEntities<IEntity>(entitiesAssembly);
             modelBuilder.RegisterEntityTypeConfiguration(entitiesAssembly);
             modelBuilder.AddRestrictDeleteBehaviorConvention();
@@ -61,15 +76,19 @@ namespace Data
 
                 foreach (var property in properties)
                 {
+                    var propName = property.Name;
                     var val = (string)property.GetValue(item.Entity, null);
 
-                    if (!val.HasValue()) continue;
-                    var newVal = val.Fa2En().FixPersianChars();
-                    if (newVal == val)
-                        continue;
-                    property.SetValue(item.Entity, newVal, null);
+                    if (val.HasValue())
+                    {
+                        var newVal = val.Fa2En().FixPersianChars();
+                        if (newVal == val)
+                            continue;
+                        property.SetValue(item.Entity, newVal, null);
+                    }
                 }
             }
         }
     }
+
 }

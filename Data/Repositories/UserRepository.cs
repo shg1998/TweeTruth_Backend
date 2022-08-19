@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Common.Exceptions;
+﻿using Common.Exceptions;
 using Common.Utilities;
 using Data.Contracts;
 using Entities.User;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Data.Repositories
 {
@@ -25,9 +23,9 @@ namespace Data.Repositories
             return Table.Where(p => p.UserName == username && p.PasswordHash == passwordHash).SingleOrDefaultAsync(cancellationToken);
         }
 
-        public Task UpdateSecuirtyStampAsync(User user, CancellationToken cancellationToken)
+        public Task UpdateSecurityStampAsync(User user, CancellationToken cancellationToken)
         {
-            user.SecurityStamp = Guid.NewGuid();
+            //user.SecurityStamp = Guid.NewGuid();
             return UpdateAsync(user, cancellationToken);
         }
 

@@ -5,7 +5,7 @@ using Entities.Common;
 
 namespace Entities.Post
 {
-    public class Category:BaseEntity
+    public class Category : BaseEntity
     {
         [Required]
         [StringLength(50)]

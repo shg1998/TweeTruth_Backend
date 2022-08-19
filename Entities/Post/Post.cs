@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Entities.Post
 {
-    public class Post:BaseEntity<Guid>
+    public class Post : BaseEntity<Guid>
     {
         public string Title { get; set; }
         public string Description { get; set; }
@@ -13,18 +13,17 @@ namespace Entities.Post
         public int AuthorId { get; set; }
 
         public Category Category { get; set; }
-        public User.User Author{ get; set; }
-
+        public User.User Author { get; set; }
     }
 
-    public class PostConfiguration:IEntityTypeConfiguration<Post>
+    public class PostConfiguration : IEntityTypeConfiguration<Post>
     {
         public void Configure(EntityTypeBuilder<Post> builder)
         {
             builder.Property(p => p.Title).IsRequired().HasMaxLength(200);
             builder.Property(p => p.Description).IsRequired();
-            builder.HasOne(p => p.Category).WithMany(p=>p.Posts).HasForeignKey(p=>p.CategoryId);
-            builder.HasOne(p => p.Author).WithMany(p=>p.Posts).HasForeignKey(p=>p.AuthorId);
+            builder.HasOne(p => p.Category).WithMany(c => c.Posts).HasForeignKey(p => p.CategoryId);
+            builder.HasOne(p => p.Author).WithMany(c => c.Posts).HasForeignKey(p => p.AuthorId);
         }
     }
 }
