@@ -1,4 +1,5 @@
-﻿using Common.Exceptions;
+﻿using System;
+using Common.Exceptions;
 using Data.Contracts;
 using Entities.User;
 using Microsoft.AspNetCore.Authorization;
@@ -11,6 +12,7 @@ using Service.Services;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using ElmahCore;
 using WebFrameworks.Api;
 using WebFrameworks.Filters;
 
@@ -19,28 +21,29 @@ namespace MyBackendApis.Controllers
     [Route("api/[controller]")]
     [ApiResultFilter]
     [ApiController]
-    public class UserController : ControllerBase
+    public class UsersController : ControllerBase
     {
-        private readonly IUserRepository _userRepository;
-        private readonly ILogger<UserController> _logger;
-        private readonly IJwtService _jwtService;
-        private readonly UserManager<User> _userManager;
-        private readonly RoleManager<Role> _roleManager;
-        private readonly SignInManager<User> _signInManager;
+        private readonly IUserRepository userRepository;
+        private readonly ILogger<UsersController> logger;
+        private readonly IJwtService jwtService;
+        private readonly UserManager<User> userManager;
+        private readonly RoleManager<Role> roleManager;
+        private readonly SignInManager<User> signInManager;
 
-        public UserController(IUserRepository userRepository, ILogger<UserController> logger, IJwtService jwtService,
+        public UsersController(IUserRepository userRepository, ILogger<UsersController> logger, IJwtService jwtService,
             UserManager<User> userManager, RoleManager<Role> roleManager, SignInManager<User> signInManager)
         {
-            this._userRepository = userRepository;
-            this._logger = logger;
-            this._jwtService = jwtService;
-            this._userManager = userManager;
-            this._roleManager = roleManager;
-            this._signInManager = signInManager;
+            this.userRepository = userRepository;
+            this.logger = logger;
+            this.jwtService = jwtService;
+            this.userManager = userManager;
+            this.roleManager = roleManager;
+            this.signInManager = signInManager;
         }
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
+        [AllowAnonymous]
         public async Task<ActionResult<List<User>>> Get(CancellationToken cancellationToken)
         {
             //var userName = HttpContext.User.Identity.GetUserName();
@@ -50,21 +53,21 @@ namespace MyBackendApis.Controllers
             //var phone = HttpContext.User.Identity.FindFirstValue(ClaimTypes.MobilePhone);
             //var role = HttpContext.User.Identity.FindFirstValue(ClaimTypes.Role);
 
-            var users = await _userRepository.TableNoTracking.ToListAsync(cancellationToken);
+            var users = await userRepository.TableNoTracking.ToListAsync(cancellationToken);
             return Ok(users);
         }
 
         [HttpGet("{id:int}")]
         public async Task<ApiResult<User>> Get(int id, CancellationToken cancellationToken)
         {
-            var user2 = await _userManager.FindByIdAsync(id.ToString());
-            var role = await _roleManager.FindByNameAsync("Admin");
+            var user2 = await userManager.FindByIdAsync(id.ToString());
+            var role = await roleManager.FindByNameAsync("Admin");
 
-            var user = await _userRepository.GetByIdAsync(cancellationToken, id);
+            var user = await userRepository.GetByIdAsync(cancellationToken, id);
             if (user == null)
                 return NotFound();
 
-            await _userManager.UpdateSecurityStampAsync(user);
+            await userManager.UpdateSecurityStampAsync(user);
             //await userRepository.UpdateSecuirtyStampAsync(user, cancellationToken);
 
             return user;
@@ -75,10 +78,10 @@ namespace MyBackendApis.Controllers
         public async Task<string> Token(string username, string password, CancellationToken cancellationToken)
         {
             //var user = await userRepository.GetByUserAndPass(username, password, cancellationToken);
-            var user = await _userManager.FindByNameAsync(username);
+            var user = await userManager.FindByNameAsync(username);
             if (user == null)
                 throw new BadRequestException("نام کاربری یا رمز عبور اشتباه است");
-            var isPasswordValid = await _userManager.CheckPasswordAsync(user, password);
+            var isPasswordValid = await userManager.CheckPasswordAsync(user, password);
             if (!isPasswordValid)
                 throw new BadRequestException("نام کاربری یا رمز عبور اشتباه است");
 
@@ -86,7 +89,7 @@ namespace MyBackendApis.Controllers
             //if (user == null)
             //    throw new BadRequestException("نام کاربری یا رمز عبور اشتباه است");
 
-            var jwt = await _jwtService.GenerateAsync(user);
+            var jwt = await jwtService.GenerateAsync(user);
             return jwt;
         }
 
@@ -94,12 +97,9 @@ namespace MyBackendApis.Controllers
         [AllowAnonymous]
         public async Task<ApiResult<User>> Create(UserDto userDto, CancellationToken cancellationToken)
         {
-            //logger.LogError("متد Create فراخوانی شد");
-            //HttpContext.RiseError(new Exception("متد Create فراخوانی شد"));
-
-            //var exists = await userRepository.TableNoTracking.AnyAsync(p => p.UserName == userDto.UserName);
-            //if (exists)
-            //    return BadRequest("نام کاربری تکراری است");
+            var exists = await userRepository.TableNoTracking.AnyAsync(p => p.UserName == userDto.UserName);
+            if (exists)
+                return BadRequest("نام کاربری تکراری است");
 
 
             var user = new User
@@ -110,15 +110,17 @@ namespace MyBackendApis.Controllers
                 UserName = userDto.UserName,
                 Email = userDto.Email
             };
-            var result = await _userManager.CreateAsync(user, userDto.Password);
+            var result = await userManager.CreateAsync(user, userDto.Password);
+            if (!result.Succeeded)
+                return BadRequest("مشکلی پیش آمده");
 
-            var result2 = await _roleManager.CreateAsync(new Role
-            {
-                Name = "Admin",
-                Description = "admin role"
-            });
+            //var result2 = await roleManager.CreateAsync(new Role
+            //{
+            //    Name = "Admin",
+            //    Description = "admin role"
+            //});
 
-            var result3 = await _userManager.AddToRoleAsync(user, "Admin");
+            //var result3 = await userManager.AddToRoleAsync(user, "Admin");
 
             //await userRepository.AddAsync(user, userDto.Password, cancellationToken);
             return user;
@@ -127,7 +129,7 @@ namespace MyBackendApis.Controllers
         [HttpPut]
         public async Task<ApiResult> Update(int id, User user, CancellationToken cancellationToken)
         {
-            var updateUser = await _userRepository.GetByIdAsync(cancellationToken, id);
+            var updateUser = await userRepository.GetByIdAsync(cancellationToken, id);
 
             updateUser.UserName = user.UserName;
             updateUser.PasswordHash = user.PasswordHash;
@@ -137,7 +139,7 @@ namespace MyBackendApis.Controllers
             updateUser.IsActive = user.IsActive;
             updateUser.LastLoginDate = user.LastLoginDate;
 
-            await _userRepository.UpdateAsync(updateUser, cancellationToken);
+            await userRepository.UpdateAsync(updateUser, cancellationToken);
 
             return Ok();
         }
@@ -145,8 +147,8 @@ namespace MyBackendApis.Controllers
         [HttpDelete]
         public async Task<ApiResult> Delete(int id, CancellationToken cancellationToken)
         {
-            var user = await _userRepository.GetByIdAsync(cancellationToken, id);
-            await _userRepository.DeleteAsync(user, cancellationToken);
+            var user = await userRepository.GetByIdAsync(cancellationToken, id);
+            await userRepository.DeleteAsync(user, cancellationToken);
 
             return Ok();
         }

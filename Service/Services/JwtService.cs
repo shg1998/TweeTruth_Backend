@@ -12,15 +12,15 @@ using System.Threading.Tasks;
 
 namespace Service.Services
 {
-    public class JwtService : IJwtService
+    public class JwtService : IJwtService, IScopedDependency
     {
         private readonly SiteSettings _siteSetting;
-        private readonly SignInManager<User> _signInManager;
+        private readonly SignInManager<User> signInManager;
 
         public JwtService(IOptionsSnapshot<SiteSettings> settings, SignInManager<User> signInManager)
         {
             _siteSetting = settings.Value;
-            this._signInManager = signInManager;
+            this.signInManager = signInManager;
         }
 
         public async Task<string> GenerateAsync(User user)
@@ -60,7 +60,7 @@ namespace Service.Services
 
         private async Task<IEnumerable<Claim>> _getClaimsAsync(User user)
         {
-            var result = await _signInManager.ClaimsFactory.CreateAsync(user);
+            var result = await signInManager.ClaimsFactory.CreateAsync(user);
             //add custom claims
             var list = new List<Claim>(result.Claims);
             list.Add(new Claim(ClaimTypes.MobilePhone, "09123456987"));
