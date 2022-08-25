@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Service.Services;
+using Services.WebFramework.CustomMapping;
 using WebFrameworks.Configurations;
 using WebFrameworks.Middlewares;
 
@@ -35,10 +36,13 @@ namespace MyBackendApis
         {
             services.Configure<SiteSettings>(Configuration.GetSection(nameof(SiteSettings)));
 
+            services.InitializeAutoMapper();
+
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("SqlServer"));
             });
+
             services.AddCustomIdentity(_siteSetting.IdentitySettings);
 
             services.AddElmah<SqlErrorLog>(options =>
