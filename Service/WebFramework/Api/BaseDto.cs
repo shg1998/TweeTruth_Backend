@@ -84,10 +84,8 @@ namespace Service.WebFramework.Api
             var entityType = typeof(TEntity);
             //Ignore any property of source (like Post.Author) that dose not contains in destination 
             foreach (var property in entityType.GetProperties())
-            {
                 if (dtoType.GetProperty(property.Name) == null)
                     mappingExpression.ForMember(property.Name, opt => opt.Ignore());
-            }
 
             CustomMappings(mappingExpression.ReverseMap());
         }

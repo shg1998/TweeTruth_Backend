@@ -91,8 +91,8 @@ namespace MyBackendApis.Controllers
         [HttpPost]
         public async Task<ApiResult<PostDto>> Create(PostDto dto, CancellationToken cancellationToken)
         {
-            var model = _mapper.Map<Post>(dto);
-
+            //var model = _mapper.Map<Post>(dto);
+            var model = dto.ToEntity(_mapper);
             #region old code
             //var model = new Post
             //{
