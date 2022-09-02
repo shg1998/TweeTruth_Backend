@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Entities.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -23,7 +25,7 @@ namespace Entities.Account
         public string ProfileBannerUrl { get; set; }
         public int AuthorId { get; set; }
         public User.User User { get; set; }
-
+        public ICollection<Tweet.Tweet> Tweets { get; set; }
     }
 
     public class AccountConfiguration : IEntityTypeConfiguration<Account>
@@ -31,6 +33,7 @@ namespace Entities.Account
         public void Configure(EntityTypeBuilder<Account> builder)
         {
             builder.HasOne(p => p.User).WithMany(c => c.Accounts).HasForeignKey(p => p.AuthorId);
+            builder.HasMany(p => p.Tweets).WithOne(c => c.Account).HasForeignKey(p => p.AccountId);
         }
     }
 }
