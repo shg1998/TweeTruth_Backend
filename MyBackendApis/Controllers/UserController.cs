@@ -1,5 +1,4 @@
-﻿using System;
-using Common.Exceptions;
+﻿using Common.Exceptions;
 using Data.Contracts;
 using Entities.User;
 using Microsoft.AspNetCore.Authorization;
@@ -7,12 +6,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Service.DTOs;
 using Service.Services;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using ElmahCore;
-using Service.DTOs;
 using WebFrameworks.Api;
 using WebFrameworks.Filters;
 
