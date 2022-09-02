@@ -19,7 +19,7 @@ namespace Entities.User
         public GenderType Gender { get; set; }
         public bool IsActive { get; set; }
         public DateTimeOffset? LastLoginDate { get; set; }
-        public ICollection<Post.Post> Posts { get; set; }
+        public ICollection<Account.Account> Accounts { get; set; }
     }
 
     public class UserConfiguration : IEntityTypeConfiguration<User>

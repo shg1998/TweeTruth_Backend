@@ -21,7 +21,7 @@ namespace Services.WebFramework.CustomMapping
             services.AddAutoMapper(config =>
             {
                 //config.CreateMap<ExamDtoTest, Exam>().ReverseMap();
-                config.AddCustomMappingProfile(typeof(PostDto).Assembly);
+                config.AddCustomMappingProfile(typeof(AccountDto).Assembly);
                 config.Advanced.BeforeSeal(configProvicer =>
                 {
                     configProvicer.CompileMappings();
