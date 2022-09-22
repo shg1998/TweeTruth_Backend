@@ -63,15 +63,15 @@ namespace MyBackendApis.Controllers
             return user;
         }
 
-        [HttpGet("[action]")]
+        [HttpPost("[action]")]
         [AllowAnonymous]
-        public async Task<string> Token(string username, string password, CancellationToken cancellationToken)
+        public async Task<string> Token(LoginDto loginDto, CancellationToken cancellationToken)
         {
             //var user = await userRepository.GetByUserAndPass(username, password, cancellationToken);
-            var user = await _userManager.FindByNameAsync(username);
+            var user = await _userManager.FindByNameAsync(loginDto.Username);
             if (user == null)
                 throw new BadRequestException("نام کاربری یا رمز عبور اشتباه است");
-            var isPasswordValid = await _userManager.CheckPasswordAsync(user, password);
+            var isPasswordValid = await _userManager.CheckPasswordAsync(user, loginDto.Password);
             if (!isPasswordValid)
                 throw new BadRequestException("نام کاربری یا رمز عبور اشتباه است");
 
@@ -87,7 +87,6 @@ namespace MyBackendApis.Controllers
             var exists = await _userRepository.TableNoTracking.AnyAsync(p => p.UserName == userDto.UserName, cancellationToken: cancellationToken);
             if (exists)
                 return BadRequest("نام کاربری تکراری است");
-
 
             var user = new User
             {

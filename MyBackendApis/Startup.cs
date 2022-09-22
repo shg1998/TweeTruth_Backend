@@ -100,7 +100,7 @@ namespace MyBackendApis
 
             app.UseAuthentication();
             app.UseAuthorization();
-
+            app.UseCors(config => config.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
