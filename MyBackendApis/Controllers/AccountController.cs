@@ -10,7 +10,9 @@ using Service.DTOs;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Common;
 using Common.Utilities;
+using Service.WebFramework.Pagination;
 using WebFrameworks.Api;
 using WebFrameworks.Filters;
 
@@ -32,12 +34,20 @@ namespace MyBackendApis.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<AbstractAccountDto>>> Get(CancellationToken cancellationToken)
+        [AllowAnonymous]
+        public async Task<ManualPagedList<AbstractAccountDto>> Get([FromQuery] PaginationParameters paginationParams,CancellationToken cancellationToken)
         {
-            var list = await _repository.TableNoTracking.ProjectTo<AbstractAccountDto>(_mapper.ConfigurationProvider)
-                .ToListAsync(cancellationToken);
-
-            return Ok(list);
+            var list =  _repository.TableNoTracking.ProjectTo<AbstractAccountDto>(_mapper.ConfigurationProvider);
+            var result = await PagedList<AbstractAccountDto>.ToPagedList(list, paginationParams.PageNumber,
+                paginationParams.PageSize, cancellationToken);
+            Response.AddPaginationHeader(result.TotalPages, result.PageSize, result.CurrentPage, result.TotalCount);
+            return new ManualPagedList<AbstractAccountDto>()
+            {
+                PageSize = result.PageSize,
+                CurrentPage = result.CurrentPage,
+                TotalCount = result.TotalCount,
+                Items = result
+            };
         }
 
         [HttpGet("{id:int}")]
