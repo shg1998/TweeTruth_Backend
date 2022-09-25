@@ -1,4 +1,5 @@
-﻿using Entities.Account;
+﻿using System.Collections.Generic;
+using Entities.Account;
 using Entities.User;
 using Service.WebFramework.Api;
 using System.ComponentModel.DataAnnotations;
@@ -21,8 +22,14 @@ namespace Service.DTOs
         public string LinkUrl { get; set; }
         public string ProfileImageUrl { get; set; }
         public string ProfileBannerUrl { get; set; }
+        public double TweetsCredibilityScore { get; set; }
+        public double UserReputationScore { get; set; }
+        public double ReTweetHIndexScore { get; set; }
+        public double LikeHIndexScore { get; set; }
+        public double InfluenceScore { get; set; }
         public int AuthorId { get; set; }
         public User User { get; set; }
+        public ICollection<Entities.Tweet.Tweet> Tweets { get; set; }
     }
 
     public class CreateAccountDto : BaseDtoComplexKey<CreateAccountDto, Account>

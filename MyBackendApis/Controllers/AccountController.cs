@@ -1,18 +1,15 @@
-﻿using System;
-using AutoMapper;
+﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Common.Utilities;
 using Data.Contracts;
 using Entities.Account;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Service.DTOs;
-using System.Collections.Generic;
+using Service.WebFramework.Pagination;
 using System.Threading;
 using System.Threading.Tasks;
-using Common;
-using Common.Utilities;
-using Service.WebFramework.Pagination;
 using WebFrameworks.Api;
 using WebFrameworks.Filters;
 
@@ -34,10 +31,9 @@ namespace MyBackendApis.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
-        public async Task<ManualPagedList<AbstractAccountDto>> Get([FromQuery] PaginationParameters paginationParams,CancellationToken cancellationToken)
+        public async Task<ManualPagedList<AbstractAccountDto>> Get([FromQuery] PaginationParameters paginationParams, CancellationToken cancellationToken)
         {
-            var list =  _repository.TableNoTracking.ProjectTo<AbstractAccountDto>(_mapper.ConfigurationProvider);
+            var list = _repository.TableNoTracking.ProjectTo<AbstractAccountDto>(_mapper.ConfigurationProvider);
             var result = await PagedList<AbstractAccountDto>.ToPagedList(list, paginationParams.PageNumber,
                 paginationParams.PageSize, cancellationToken);
             Response.AddPaginationHeader(result.TotalPages, result.PageSize, result.CurrentPage, result.TotalCount);
@@ -62,7 +58,7 @@ namespace MyBackendApis.Controllers
             return dto;
         }
 
-       
+
         [HttpPost]
         public async Task<ApiResult<AccountDto>> Create(CreateAccountDto dto, CancellationToken cancellationToken)
         {
